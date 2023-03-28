@@ -1,6 +1,9 @@
 let button1 = document.getElementById("ans1");
 let button2 = document.querySelector("#ans2");
 
+// move screen_id to the global scope (also changed in the first function call to displayScreen
+let screen_id = 1
+
 
 // data structure
 class Screen {
@@ -108,18 +111,26 @@ const tree = {
 };
 
 // execution
+
+// these are here to quickly check getEventListeners in the console and should be deleted
 x = document.querySelector('#ans1')
-const view = tree[screen_id]
-
-
+y = document.querySelector('#ans2')
 
 function displayScreen(screen_id) {
-    const screen = tree[screen_id];
-    // display main title
+    const screen = ree[screen_id];
 
+    // display main title
     let main_title = document.querySelector(".main_title");
     main_title.innerText = screen.title;
     main_title.style.fontSize = "5rem";
+
+    // a single conditional to set the color instead of the two lines that reset the color on every page but the intro.
+
+    // performance could be improved by changing it to check and see if the screen_id IS 1, then applying the red styling to that and leaving purple as the default in the CSS
+    if ( screen_id != 1) {
+        main_title.style.color = 'black'
+        main_title.style.textShadow = "5px 5px 5px purple"
+    }
 
     // reset the question the question text for the current screen
     let question_text_element = document.querySelector(".text");
@@ -128,50 +139,39 @@ function displayScreen(screen_id) {
     // reset the image url for the current screen
     document.body.style.background = "url(" + screen.imgurl + ")";
 
-    // reset button one for the current screen
-    console.log(button1.parentNode)
-
-    button1.innerText = screen.ans1.text;
     
-    // const button1ClearListner = () => {
-    //     button1.removeEventListener('click', button1ReplaceListener)
-    // }
 
-    // const button1AddListner = () => {
-       
-    // }
+    // reset button one for the current screen
+    let button1 = document.querySelector("#ans1");
+    button1.innerText = screen.ans1.text;
 
-   
-      // reset button two for the current screen
-      button2.innerText = screen.ans2.text;
+    // uses the html data-* attribute to create a custom key-value pair on the DOM element that stores the screen_id (see this for more details https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes)
+    button1.dataset.screen_id = screen.ans1.screen_id
+
+
+    // reset button two for the current screen
+    let button2 = document.querySelector("#ans2");
+    button2.innerText = screen.ans2.text;
+    // same dataset thing as with button 1 above
+    button2.dataset.screen_id = screen.ans2.screen_id
 
     // Background size
     document.body.style.backgroundSize = screen.backgroundSize;
+    // Background Repeat
+    document.body.style.backgroundRepeat = screen.backgroundRepeat;
 }
-
-const button1ReplaceListener = () => {
-    console.log(screen)
-    displayScreen(view.ans1.screen_id);
-    // button1.removeEventListener('click', button1ReplaceListener)
-    // button1.addEventListener("click", button1ReplaceListener)
-    main_title.style.color = 'black'
-    main_title.style.textShadow = "5px 5px 5px purple"
-}
-
-const button2ReplaceListener = () => {
-    displayScreen(view.ans2.screen_id);
-    // button1.removeEventListener('click', button1ReplaceListener)
-    // button1.addEventListener("click", button1ReplaceListener)
-    main_title.style.color = 'black'
-    main_title.style.textShadow = "5px 5px 5px purple"
-}
-
-button1.addEventListener('click', button1ReplaceListener)
-
-  
-
-    button2.addEventListener('click', button2ReplaceListener)
-
 
 // starts at one always
-displayScreen(1);
+displayScreen(screen_id);
+
+// Add event listeners to each button once when the page loads (this could be condensed into a single function that works on both buttons)
+button1.addEventListener('click', (e) => {
+    // displayScreen now pulls the screen_id from the DOM element itself, which is set on line 149 for button 1, 156 for button 2
+    displayScreen(e.target.dataset.screen_id)
+})
+
+button2.addEventListener('click', (e) => {
+    displayScreen(e.target.dataset.screen_id)
+})
+
+// Now, every time displayScreen is run, it takes the appropriate number from the tree[screen_id].ans1 and ans2 and adds that number to the buttons as the "data-screen_id" attribute. The JS then accesses that number to plug into displayScreen when the button is clicked and moves to the right screen.
